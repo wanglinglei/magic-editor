@@ -33,6 +33,8 @@ export const DEFAULT_EDITOR_OPERATORS = [
       label: '删除线',
     },
   ],
-]
+];
 
-export const DEFAULT_EDITOR_ID = 'magic-editor'
+export const DEFAULT_EDITOR_ID = 'magic-editor';
+
+export const DEFAULT_EDITOR_CONTENT = '欢迎使用富文本编辑器！在这里开始编写你的内容...';

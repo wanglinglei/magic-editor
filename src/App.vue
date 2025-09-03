@@ -3,7 +3,7 @@
   <MagicEditor :operators="DEFAULT_EDITOR_OPERATORS" />
 </template>
 <script setup lang="ts">
-import MagicEditor from './components/magic-editor/index.vue'
-import { DEFAULT_EDITOR_OPERATORS } from './components/magic-editor/constants/config'
+import MagicEditor from './components/magic-editor/index.vue';
+import { DEFAULT_EDITOR_OPERATORS } from './components/magic-editor/constants/config';
 </script>
 <style scoped></style>

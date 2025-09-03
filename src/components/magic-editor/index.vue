@@ -28,7 +28,7 @@
     </div>
     <!-- 编辑器内容区域 -->
     <div class="editor-content borderGray" :id="editorId" contenteditable="true" spellcheck="false">
-      <p>欢迎使用富文本编辑器！在这里开始编写你的内容...</p>
+      <p>{{ defaultContent }}</p>
     </div>
 
     <!-- 状态栏 -->
@@ -40,16 +40,21 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import type { EditorProps } from './types/component'
-import { RichTextEditor } from './lib/RichTextEditor'
-import { DEFAULT_EDITOR_ID } from './constants/config'
+import { onMounted } from 'vue';
+import type { EditorProps } from './types/component';
+import { RichTextEditor } from './lib/RichTextEditor';
+import { DEFAULT_EDITOR_ID, DEFAULT_EDITOR_CONTENT } from './constants/config';
 
-const { style, editorId = DEFAULT_EDITOR_ID, operators = [] } = defineProps<EditorProps>()
+const {
+  style,
+  editorId = DEFAULT_EDITOR_ID,
+  operators = [],
+  defaultContent = DEFAULT_EDITOR_CONTENT,
+} = defineProps<EditorProps>();
 
 onMounted(() => {
-  const richTextEditor = new RichTextEditor({ editorId, operators })
-})
+  const richTextEditor = new RichTextEditor({ editorId, operators });
+});
 </script>
 
 <style lang="less" scoped>

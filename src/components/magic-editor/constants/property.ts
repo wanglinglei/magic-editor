@@ -14,4 +14,9 @@ export const PROPERTY = {
     styleProperty: 'text-decoration',
     styleValue: 'underline',
   },
-}
+  strikeThrough: {
+    tagName: 's',
+    styleProperty: 'text-decoration',
+    styleValue: 'line-through',
+  },
+};
