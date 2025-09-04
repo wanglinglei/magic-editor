@@ -1,39 +1,36 @@
-export const DEFAULT_EDITOR_OPERATORS = [
-  [
-    {
-      type: 'undo',
-      operatorType: 'default',
-      label: '撤销',
-    },
-    {
-      type: 'reset',
-      operatorType: 'default',
-      label: '重置',
-    },
-  ],
-  [
-    {
-      type: 'blod',
-      operatorType: 'default',
-      label: '加粗',
-    },
-    {
-      type: 'italic',
-      operatorType: 'default',
-      label: '斜体',
-    },
-    {
-      type: 'underline',
-      operatorType: 'default',
-      label: '下划线',
-    },
-    {
-      type: 'strikeThrough',
-      operatorType: 'default',
-      label: '删除线',
-    },
-  ],
-];
+export const DEFAULT_EDITOR_OPERATORS = {
+  undo: {
+    type: 'undo',
+    operatorType: 'default',
+    label: '撤销',
+  },
+  reset: {
+    type: 'reset',
+    operatorType: 'default',
+    label: '重置',
+  },
+
+  blod: {
+    type: 'blod',
+    operatorType: 'default',
+    label: '加粗',
+  },
+  italic: {
+    type: 'italic',
+    operatorType: 'default',
+    label: '斜体',
+  },
+  underline: {
+    type: 'underline',
+    operatorType: 'default',
+    label: '下划线',
+  },
+  strikeThrough: {
+    type: 'strikeThrough',
+    operatorType: 'default',
+    label: '删除线',
+  },
+};
 
 export const DEFAULT_EDITOR_ID = 'magic-editor';
 

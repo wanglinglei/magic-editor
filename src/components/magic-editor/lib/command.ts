@@ -5,7 +5,6 @@ export class Command {
 
   executeCommand(commandData: CommandData) {
     const { command, range, selection } = commandData;
-    console.log('executeCommand', commandData);
     if (!range || !selection) {
       return;
     }

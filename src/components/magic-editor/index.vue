@@ -7,9 +7,9 @@
         <div
           class="flex-start p-y-5px px-x-10px borderGray mx-10px rounded-6px"
           :class="{
-            'border-r-gray-200': index !== operators.length - 1,
+            'border-r-gray-200': index !== operatorConfigs.length - 1,
           }"
-          v-for="(group, index) in operators"
+          v-for="(group, index) in operatorConfigs"
           :key="index"
         >
           <div
@@ -40,10 +40,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, computed } from 'vue';
 import type { EditorProps } from './types/component';
 import { RichTextEditor } from './lib/RichTextEditor';
-import { DEFAULT_EDITOR_ID, DEFAULT_EDITOR_CONTENT } from './constants/config';
+import {
+  DEFAULT_EDITOR_ID,
+  DEFAULT_EDITOR_CONTENT,
+  DEFAULT_EDITOR_OPERATORS,
+} from './constants/config';
 
 const {
   style,
@@ -51,6 +55,14 @@ const {
   operators = [],
   defaultContent = DEFAULT_EDITOR_CONTENT,
 } = defineProps<EditorProps>();
+
+const operatorConfigs = computed(() => {
+  return operators.map((group) => {
+    return group.map((item) => {
+      return DEFAULT_EDITOR_OPERATORS[item];
+    });
+  });
+});
 
 onMounted(() => {
   const richTextEditor = new RichTextEditor({ editorId, operators });
