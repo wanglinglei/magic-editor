@@ -1,140 +1,71 @@
-import type { CommandData } from '../types/command';
-import { PROPERTY, DEFAULT_EDITOR_CONTENT } from '../constants';
-export class Command {
-  constructor(private editor: HTMLElement) {}
+import type { CommandData, CommandResult, CommandType } from '../types/command';
+import { CommandRegistry } from './commands';
 
-  executeCommand(commandData: CommandData) {
-    const { command, range, selection } = commandData;
-    if (!range || !selection) {
-      return;
-    }
-    switch (command) {
-      case 'blod':
-      case 'italic':
-      case 'underline':
-      case 'strikeThrough':
-        this.toggleFormat(commandData);
-        break;
-      case 'reset':
-        this.resetContent();
-    }
+/**
+ * 命令管理器 - 使用命令注册中心管理不同类型的命令
+ * 提供简化的接口，内部委托给CommandRegistry处理
+ */
+export class Command {
+  private readonly registry: CommandRegistry;
+
+  constructor(private readonly editor: HTMLElement) {
+    this.registry = new CommandRegistry(editor);
   }
 
   /**
-   * @description: 重置内容
-   * @return {*}
+   * 执行命令
    */
-  resetContent() {
-    this.editor.innerHTML = `<p>${DEFAULT_EDITOR_CONTENT}</p>`;
-  }
-
-  // 切换格式化（粗体、斜体等）
-  toggleFormat(commandData: CommandData) {
+  executeCommand(commandData: CommandData): CommandResult {
     const { command, range, selection } = commandData;
 
-    const selectedText = range.toString();
-    if (!selectedText) {
-      return;
+    if (!range || !selection) {
+      const error = 'Invalid command data: missing range or selection';
+      console.warn(error);
+      return { success: false, error };
     }
 
-    // 检查是否已经应用了格式
-    const parentElement =
-      range.commonAncestorContainer.nodeType === Node.TEXT_NODE
-        ? range.commonAncestorContainer.parentElement
-        : (range.commonAncestorContainer as HTMLElement);
-    const commandProperty = PROPERTY[command as keyof typeof PROPERTY];
-    if (!commandProperty) {
-      return;
-    }
-    const { tagName, styleProperty, styleValue } = commandProperty;
-    const isFormatted = parentElement
-      ? this.isFormatApplied(parentElement, tagName, styleProperty, styleValue)
-      : false;
-
-    if (isFormatted) {
-      this.removeFormat(commandData, tagName);
-    } else {
-      this.applyFormatToRange(commandData, tagName, styleProperty, styleValue);
+    const executor = this.registry.get(command);
+    if (!executor) {
+      const error = `Unsupported command: ${command}`;
+      console.warn(error);
+      return { success: false, error };
     }
 
-    // 恢复选择
-    selection.removeAllRanges();
-    selection.addRange(range.cloneRange());
+    return executor.execute(commandData, this.editor);
   }
 
-  // 应用格式到范围
-  applyFormatToRange(
-    commandData: CommandData,
-    tagName: string,
-    styleProperty: string,
-    styleValue: string
-  ) {
-    const { range } = commandData;
-    // const range = this.getRange()
-    // const selection = this.getSelection()
-    const element = document.createElement(tagName);
-    if (styleProperty && styleValue) {
-      element.style.setProperty(styleProperty, styleValue);
-    }
-    try {
-      range.surroundContents(element);
-    } catch (e) {
-      // 如果不能直接包围内容，则提取内容
-      const contents = range.extractContents();
-      element.appendChild(contents);
-      range.insertNode(element);
-    }
+  /**
+   * 注册新的命令执行器
+   */
+  registerCommand(command: CommandType, executor: import('./commands').ICommandExecutor): void {
+    this.registry.register(command, executor);
   }
 
-  // 移除格式
-  removeFormat(commandData: CommandData, tagName: string) {
-    const { range, selection } = commandData;
-    // const selection = this.getSelection()
-    const selectedText = range.toString();
-
-    // 创建一个临时容器来处理选中的内容
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = selectedText;
-
-    // 移除指定的格式标签
-    const elementsToRemove = tempDiv.querySelectorAll(tagName);
-    elementsToRemove.forEach((el) => {
-      const parent = el.parentNode;
-      if (parent) {
-        while (el.firstChild) {
-          parent.insertBefore(el.firstChild, el);
-        }
-        parent.removeChild(el);
-      }
-    });
-
-    // 替换选中的内容
-    range.deleteContents();
-    range.insertNode(document.createTextNode(tempDiv.textContent || ''));
-
-    // 恢复选择
-    selection.removeAllRanges();
-    selection.addRange(range.cloneRange());
+  /**
+   * 获取支持的命令列表
+   */
+  getSupportedCommands(): CommandType[] {
+    return this.registry.getAllCommands();
   }
 
-  // 检查格式是否已应用
-  isFormatApplied(
-    element: HTMLElement,
-    tagName: string,
-    styleProperty: string,
-    styleValue: string
-  ) {
-    let current = element;
+  /**
+   * 检查命令是否已注册
+   */
+  hasCommand(command: CommandType): boolean {
+    return this.registry.has(command);
+  }
 
-    while (current && current !== this.editor) {
-      if (current.tagName && current.tagName.toLowerCase() === tagName.toLowerCase()) {
-        if (!styleProperty || current.style.getPropertyValue(styleProperty) === styleValue) {
-          return true;
-        }
-      }
-      current = current.parentElement!;
-    }
+  /**
+   * 移除命令执行器
+   */
+  unregisterCommand(command: CommandType): boolean {
+    return this.registry.unregister(command);
+  }
 
-    return false;
+  /**
+   * 获取命令注册中心实例（用于高级操作）
+   */
+  getRegistry(): CommandRegistry {
+    return this.registry;
   }
 }
