@@ -4,11 +4,11 @@ import { FormatCommandExecutor, FORMAT_COMMANDS } from './format';
 import {
   ResetCommandExecutor,
   UndoCommandExecutor,
-  RedoCommandExecutor,
   ClearCommandExecutor,
   CONTENT_COMMANDS,
 } from './content';
 import { OrderedListCommandExecutor, UnorderedListCommandExecutor, LIST_COMMANDS } from './list';
+import type { HistoryManager } from '../history';
 
 /**
  * 命令注册中心
@@ -17,7 +17,10 @@ import { OrderedListCommandExecutor, UnorderedListCommandExecutor, LIST_COMMANDS
 export class CommandRegistry {
   private readonly executors = new Map<CommandType, ICommandExecutor>();
 
-  constructor(private readonly editor: HTMLElement) {
+  constructor(
+    private readonly editor: HTMLElement,
+    private readonly historyManager?: HistoryManager
+  ) {
     this.registerDefaultCommands();
   }
 
@@ -31,10 +34,10 @@ export class CommandRegistry {
       this.executors.set(command as CommandType, formatExecutor);
     });
 
-    // 注册内容操作命令
-    this.executors.set('reset', new ResetCommandExecutor(this.editor));
-    this.executors.set('undo', new UndoCommandExecutor(this.editor));
-    this.executors.set('redo', new RedoCommandExecutor(this.editor));
+    // 注册内容操作命令（传递历史管理器）
+    this.executors.set('reset', new ResetCommandExecutor(this.editor, this.historyManager));
+    this.executors.set('undo', new UndoCommandExecutor(this.editor, this.historyManager));
+    this.executors.set('clear', new ClearCommandExecutor(this.editor, this.historyManager));
 
     // 注册列表命令（如果需要）
     // this.executors.set('orderedList', new OrderedListCommandExecutor(this.editor));

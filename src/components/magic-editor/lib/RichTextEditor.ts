@@ -1,6 +1,12 @@
 import type { RichTextEditorOptions } from '../types';
 import type { CommandType } from '../types/command';
 import { Command } from './command';
+import { HistoryManager } from './history';
+import {
+  DEFAULT_EDITOR_ID,
+  DEFAULT_MAX_HISTORY_SIZE,
+  DEFAULT_AUTO_SAVE_INTERVAL,
+} from '../constants';
 
 /**
  * 富文本编辑器类
@@ -8,15 +14,20 @@ import { Command } from './command';
  */
 export class RichTextEditor {
   private readonly editor: HTMLElement;
-  private readonly history: string[] = [];
   private readonly wordCountElement: HTMLElement;
   private readonly charCountElement: HTMLElement;
   private readonly command: Command;
+  private readonly historyManager: HistoryManager;
   private savedRange: Range | null = null;
   private savedSelection: Selection | null = null;
 
-  constructor(options: RichTextEditorOptions) {
-    const { editorId = 'editor' } = options;
+  constructor(options: RichTextEditorOptions = {}) {
+    const {
+      editorId = DEFAULT_EDITOR_ID,
+      maxHistorySize = DEFAULT_MAX_HISTORY_SIZE,
+      autoSaveInterval = DEFAULT_AUTO_SAVE_INTERVAL,
+      supportedCommands = [],
+    } = options;
 
     // 初始化DOM元素
     this.editor = this.getElementById(editorId);
@@ -26,11 +37,28 @@ export class RichTextEditor {
     // 初始化命令处理器
     this.command = new Command(this.editor);
 
+    // 获取实际支持的命令列表
+    const actualSupportedCommands =
+      supportedCommands.length > 0 ? supportedCommands : this.command.getSupportedCommands();
+
+    // 初始化历史管理器（根据命令自动检测是否启用）
+    this.historyManager = new HistoryManager({
+      maxSize: maxHistorySize,
+      autoSaveInterval,
+      supportedCommands: actualSupportedCommands,
+    });
+
+    // 重新初始化命令处理器，传递历史管理器
+    this.command = new Command(this.editor, this.historyManager);
+
     // 绑定事件
     this.bindEvents();
 
     // 初始化字数统计
     this.updateWordCount();
+
+    // 初始化历史记录
+    this.initializeHistory();
   }
 
   /**
@@ -101,6 +129,7 @@ export class RichTextEditor {
    */
   private handleEditorInput(): void {
     this.updateWordCount();
+    this.saveToHistory();
   }
 
   /**
@@ -130,6 +159,9 @@ export class RichTextEditor {
     }
 
     this.updateWordCount();
+
+    // 命令执行成功后强制保存到历史记录（忽略时间间隔限制）
+    this.forceSaveToHistory();
   }
 
   /**
@@ -260,9 +292,15 @@ export class RichTextEditor {
     wordCount: number;
     charCount: number;
     hasSelection: boolean;
+    history: {
+      canUndo: boolean;
+      currentIndex: number;
+      totalRecords: number;
+    };
   } {
     const textContent = this.getTextContent();
     const { wordCount, charCount } = this.calculateWordCount(textContent);
+    const historyStatus = this.historyManager.getStatus();
 
     return {
       content: this.getContent(),
@@ -270,6 +308,104 @@ export class RichTextEditor {
       wordCount,
       charCount,
       hasSelection: this.savedRange !== null && this.savedSelection !== null,
+      history: {
+        canUndo: historyStatus.canUndo,
+        currentIndex: historyStatus.currentIndex,
+        totalRecords: historyStatus.totalRecords,
+      },
     };
+  }
+
+  /**
+   * 初始化历史记录
+   */
+  private initializeHistory(): void {
+    const initialContent = this.getContent();
+    this.historyManager.initialize(initialContent);
+  }
+
+  /**
+   * 保存当前状态到历史记录
+   */
+  private saveToHistory(): void {
+    const content = this.getContent();
+    const selection = this.getSelectionRange();
+    this.historyManager.save(content, selection);
+  }
+
+  /**
+   * 强制保存当前状态到历史记录（忽略时间间隔限制）
+   */
+  private forceSaveToHistory(): void {
+    const content = this.getContent();
+    const selection = this.getSelectionRange();
+    this.historyManager.forceSave(content, selection);
+  }
+
+  /**
+   * 公共方法：立即保存当前状态到历史记录
+   */
+  public saveToHistoryNow(): void {
+    this.forceSaveToHistory();
+  }
+
+  /**
+   * 获取当前选择范围（用于历史记录）
+   */
+  private getSelectionRange(): { start: number; end: number } | undefined {
+    try {
+      const selection = this.getSelection();
+      if (!selection || selection.rangeCount === 0) {
+        return undefined;
+      }
+
+      const range = selection.getRangeAt(0);
+      const textContent = this.editor.textContent || '';
+
+      // 简化实现：使用文本内容的偏移量
+      // 实际项目中可能需要更复杂的选择位置计算
+      return {
+        start: Math.min(range.startOffset, textContent.length),
+        end: Math.min(range.endOffset, textContent.length),
+      };
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
+   * 检查是否可以撤销
+   */
+  public canUndo(): boolean {
+    return this.historyManager.canUndo();
+  }
+
+  /**
+   * 获取历史管理器实例（用于高级操作）
+   */
+  public getHistoryManager(): HistoryManager {
+    return this.historyManager;
+  }
+
+  /**
+   * 清空历史记录
+   */
+  public clearHistory(): void {
+    this.historyManager.clear();
+    this.initializeHistory();
+  }
+
+  /**
+   * 获取支持的命令列表
+   */
+  public getSupportedCommands(): CommandType[] {
+    return this.command.getSupportedCommands();
+  }
+
+  /**
+   * 获取命令管理器实例（用于高级操作）
+   */
+  public getCommandManager(): Command {
+    return this.command;
   }
 }

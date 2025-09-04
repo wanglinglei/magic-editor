@@ -1,5 +1,6 @@
 import type { CommandData, CommandResult, CommandType } from '../types/command';
 import { CommandRegistry } from './commands';
+import type { HistoryManager } from './history';
 
 /**
  * 命令管理器 - 使用命令注册中心管理不同类型的命令
@@ -8,8 +9,11 @@ import { CommandRegistry } from './commands';
 export class Command {
   private readonly registry: CommandRegistry;
 
-  constructor(private readonly editor: HTMLElement) {
-    this.registry = new CommandRegistry(editor);
+  constructor(
+    private readonly editor: HTMLElement,
+    private readonly historyManager?: HistoryManager
+  ) {
+    this.registry = new CommandRegistry(editor, historyManager);
   }
 
   /**

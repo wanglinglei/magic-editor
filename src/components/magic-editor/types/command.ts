@@ -1,25 +1,30 @@
 /**
  * 格式化命令类型
+ * 粗体、斜体、下划线、删除线
  */
 export type FormatCommandType = 'blod' | 'italic' | 'underline' | 'strikeThrough';
 
 /**
  * 内容操作命令类型
+ * 重置、撤销、清空
  */
-export type ContentCommandType = 'reset' | 'undo' | 'redo' | 'clear';
+export type ContentCommandType = 'reset' | 'undo' | 'clear';
 
 /**
  * 列表命令类型
+ * 有序列表、无序列表
  */
 export type ListCommandType = 'orderedList' | 'unorderedList';
 
 /**
  * 链接命令类型
+ * 创建链接、移除链接
  */
 export type LinkCommandType = 'createLink' | 'removeLink';
 
 /**
  * 图片命令类型
+ * 插入图片、移除图片
  */
 export type ImageCommandType = 'insertImage' | 'removeImage';
 

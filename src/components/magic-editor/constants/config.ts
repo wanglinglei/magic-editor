@@ -9,6 +9,11 @@ export const DEFAULT_EDITOR_OPERATORS = {
     operatorType: 'default',
     label: '重置',
   },
+  clear: {
+    type: 'clear',
+    operatorType: 'default',
+    label: '清空',
+  },
 
   blod: {
     type: 'blod',
@@ -35,3 +40,7 @@ export const DEFAULT_EDITOR_OPERATORS = {
 export const DEFAULT_EDITOR_ID = 'magic-editor';
 
 export const DEFAULT_EDITOR_CONTENT = '欢迎使用富文本编辑器！在这里开始编写你的内容...';
+
+export const DEFAULT_MAX_HISTORY_SIZE = 30;
+
+export const DEFAULT_AUTO_SAVE_INTERVAL = 1000;

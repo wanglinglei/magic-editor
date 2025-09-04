@@ -8,7 +8,6 @@ export { FormatCommandExecutor, FORMAT_COMMANDS, isFormatCommand } from './forma
 export {
   ResetCommandExecutor,
   UndoCommandExecutor,
-  RedoCommandExecutor,
   ClearCommandExecutor,
   CONTENT_COMMANDS,
   isContentCommand,
