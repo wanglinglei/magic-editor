@@ -8,6 +8,7 @@ import {
   CONTENT_COMMANDS,
 } from './content';
 import { OrderedListCommandExecutor, UnorderedListCommandExecutor, LIST_COMMANDS } from './list';
+import { ExportCommandExecutor } from './download';
 import type { HistoryManager } from '../history';
 
 /**
@@ -38,6 +39,9 @@ export class CommandRegistry {
     this.executors.set('reset', new ResetCommandExecutor(this.editor, this.historyManager));
     this.executors.set('undo', new UndoCommandExecutor(this.editor, this.historyManager));
     this.executors.set('clear', new ClearCommandExecutor(this.editor, this.historyManager));
+
+    // 注册下载命令
+    this.executors.set('export', new ExportCommandExecutor(this.editor));
 
     // 注册列表命令（如果需要）
     // this.executors.set('orderedList', new OrderedListCommandExecutor(this.editor));

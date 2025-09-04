@@ -1,6 +1,6 @@
 import type { CommandData, FormatConfig } from '../../types/command';
-import { PROPERTY } from '../../constants';
 import { BaseCommandExecutor } from './base';
+import { PROPERTY } from '../../constants/commands';
 
 /**
  * 格式化命令执行器
@@ -133,14 +133,9 @@ export class FormatCommandExecutor extends BaseCommandExecutor {
   }
 }
 
-/**
- * 支持的格式化命令列表
- */
-export const FORMAT_COMMANDS = ['blod', 'italic', 'underline', 'strikeThrough'] as const;
-
-/**
- * 检查是否为格式化命令
- */
-export function isFormatCommand(command: string): command is (typeof FORMAT_COMMANDS)[number] {
-  return FORMAT_COMMANDS.includes(command as (typeof FORMAT_COMMANDS)[number]);
-}
+// 导出常量，从统一的常量文件中重新导出
+export {
+  DEFAULT_FORMAT_COMMANDS_CONFIG,
+  FORMAT_COMMANDS,
+  isFormatCommand,
+} from '../../constants/commands';

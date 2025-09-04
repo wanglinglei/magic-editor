@@ -40,6 +40,11 @@ export type TableCommandType =
   | 'deleteColumn';
 
 /**
+ * 下载命令类型
+ */
+export type ExportCommandType = 'export';
+
+/**
  * 支持的所有命令类型
  */
 export type CommandType =
@@ -48,7 +53,8 @@ export type CommandType =
   | ListCommandType
   | LinkCommandType
   | ImageCommandType
-  | TableCommandType;
+  | TableCommandType
+  | ExportCommandType;
 
 /**
  * 命令数据接口

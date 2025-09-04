@@ -47,14 +47,5 @@ export class UnorderedListCommandExecutor extends BaseCommandExecutor {
   }
 }
 
-/**
- * 支持的列表命令列表
- */
-export const LIST_COMMANDS = ['orderedList', 'unorderedList'] as const;
-
-/**
- * 检查是否为列表命令
- */
-export function isListCommand(command: string): command is (typeof LIST_COMMANDS)[number] {
-  return LIST_COMMANDS.includes(command as (typeof LIST_COMMANDS)[number]);
-}
+// 导出常量，从统一的常量文件中重新导出
+export { LIST_COMMANDS, isListCommand } from '../../constants/commands';

@@ -1,6 +1,6 @@
-import { DEFAULT_EDITOR_CONTENT } from '../../constants';
 import { BaseCommandExecutor } from './base';
 import type { HistoryManager } from '../history';
+import { DEFAULT_EDITOR_CONTENT } from '../../constants/editor';
 
 /**
  * 重置命令执行器
@@ -119,14 +119,9 @@ export class ClearCommandExecutor extends BaseCommandExecutor {
   }
 }
 
-/**
- * 支持的内容操作命令列表
- */
-export const CONTENT_COMMANDS = ['reset', 'undo', 'clear'] as const;
-
-/**
- * 检查是否为内容操作命令
- */
-export function isContentCommand(command: string): command is (typeof CONTENT_COMMANDS)[number] {
-  return CONTENT_COMMANDS.includes(command as (typeof CONTENT_COMMANDS)[number]);
-}
+// 导出常量，从统一的常量文件中重新导出
+export {
+  DEFAULT_CONTENT_COMMANDS_CONFIG,
+  CONTENT_COMMANDS,
+  isContentCommand,
+} from '../../constants/commands';

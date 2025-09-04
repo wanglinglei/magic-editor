@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, defineEmits, nextTick } from 'vue';
 import type { EditorProps } from './types/component';
 import { RichTextEditor } from './lib/RichTextEditor';
 import {
@@ -81,64 +81,27 @@ const supportedCommands = computed(() => {
   return commands;
 });
 
-onMounted(() => {
-  console.log('=== 编辑器初始化开始 ===');
-  console.log('编辑器ID:', editorId);
-  console.log('支持的命令:', supportedCommands.value);
-  console.log('历史记录配置:', { maxHistorySize, autoSaveInterval });
+let richTextEditor: RichTextEditor | null = null;
+const emit = defineEmits(['ready']);
 
-  const richTextEditor = new RichTextEditor({
+onMounted(() => {
+  richTextEditor = new RichTextEditor({
     editorId,
     maxHistorySize,
     autoSaveInterval,
     supportedCommands: supportedCommands.value,
   });
+  nextTick(() => {
+    emit('ready');
+  });
+});
 
-  // 将编辑器实例暴露到全局，方便调试
-  (window as unknown as Record<string, unknown>).richTextEditor = richTextEditor;
+const getContent = () => {
+  return richTextEditor?.getContent();
+};
 
-  // 调试信息
-  setTimeout(() => {
-    console.log('=== 编辑器初始化完成 ===');
-    const historyManager = richTextEditor.getHistoryManager();
-    const historyStatus = historyManager.getStatus();
-
-    console.log('历史记录状态:', historyStatus);
-    console.log('历史记录是否启用:', historyStatus.enabled);
-    console.log('可以撤销:', richTextEditor.canUndo());
-    console.log('当前内容:', richTextEditor.getContent());
-    console.log('历史记录详情:', historyManager.getAllRecords());
-
-    // 如果历史记录没有启用，强制启用并测试
-    if (!historyStatus.enabled) {
-      console.log('⚠️ 历史记录未启用，尝试强制启用...');
-      // 手动设置启用状态
-      historyManager.setEnabled(true);
-      console.log('强制启用后状态:', historyManager.getStatus());
-    }
-
-    // 测试手动保存一条记录
-    console.log('=== 测试手动保存历史记录 ===');
-    richTextEditor.saveToHistoryNow();
-
-    setTimeout(() => {
-      const newStatus = historyManager.getStatus();
-      console.log('保存后的历史记录状态:', newStatus);
-      console.log('现在可以撤销:', richTextEditor.canUndo());
-
-      // 如果还是不行，尝试直接调用历史管理器
-      if (newStatus.totalRecords === 0) {
-        console.log('🔧 直接调用历史管理器保存...');
-        const content = richTextEditor.getContent();
-        historyManager.forceSave(content);
-
-        setTimeout(() => {
-          const finalStatus = historyManager.getStatus();
-          console.log('直接保存后状态:', finalStatus);
-        }, 100);
-      }
-    }, 100);
-  }, 1000);
+defineExpose({
+  getContent,
 });
 </script>
 
